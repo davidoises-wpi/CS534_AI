@@ -18,6 +18,22 @@ def my_hill_climbing(problem):
 
     return current
 
+def my_simulated_annealing(problem, schedule=exp_schedule()):
+    """ This version returns all the states encountered in reaching 
+    the goal state."""
+    current = Node(problem.initial)
+    for t in range(sys.maxsize):
+        T = schedule(t)
+        if T == 0:
+            return current
+        neighbors = current.expand(problem)
+        if not neighbors:
+            return current
+        next_choice = random.choice(neighbors)
+        delta_e = problem.value(next_choice.state) - problem.value(current.state)
+        if delta_e > 0 or probability(np.exp(delta_e / T)):
+            current = next_choice
+
 class TravelingSalesmanProblem(Problem):
     """The problem of searching a graph from one node to another."""
 
@@ -133,5 +149,7 @@ class SimpleProblemSolvingAgent(SimpleProblemSolvingAgentProgram):
             return astar_search(problem, problem.h, False)
         elif self.search_algorithm == 'Hill_climbing':
             return my_hill_climbing(problem)
+        elif self.search_algorithm == 'Simulated_annealing':
+            return my_simulated_annealing(problem)
         
         return None
