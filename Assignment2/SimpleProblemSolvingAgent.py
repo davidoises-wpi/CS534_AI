@@ -1,4 +1,70 @@
 from search import *
+
+def my_hill_climbing(problem):
+    """
+    [Figure 4.2]
+    From the initial node, keep choosing the neighbor with highest value,
+    stopping when no neighbor is better.
+    """
+    current = Node(problem.initial)
+    while True:
+        neighbors = current.expand(problem)
+        if not neighbors:
+            break
+        neighbor = argmax_random_tie(neighbors, key=lambda node: problem.value(node.state))
+        if problem.value(neighbor.state) <= problem.value(current.state):
+            break
+        current = neighbor
+
+    return current
+
+class TravelingSalesmanProblem(Problem):
+    """The problem of searching a graph from one node to another."""
+
+    def __init__(self, initial, goal, graph):
+        super().__init__(initial, goal)
+        self.graph = graph
+
+    def actions(self, A):
+        """The actions at a graph node are just its neighbors."""
+        return list(self.graph.get(A).keys())
+
+    def result(self, state, action):
+        """The result of going to a neighbor is just that neighbor."""
+        return action
+
+    def path_cost(self, cost_so_far, A, action, B):
+        return cost_so_far + (self.graph.get(A, B) or np.inf)
+
+    def find_min_edge(self):
+        """Find minimum value of edges."""
+        m = np.inf
+        for d in self.graph.graph_dict.values():
+            local_min = min(d.values())
+            m = min(m, local_min)
+
+        return m
+
+    def h(self, node):
+        """h function is straight-line distance from a node's state to goal."""
+        locs = getattr(self.graph, 'locations', None)
+        if locs:
+            if type(node) is str:
+                return int(distance(locs[node], locs[self.goal]))
+
+            return int(distance(locs[node.state], locs[self.goal]))
+        else:
+            return np.inf
+    
+    def value(self, state):
+        """For optimization problems, each state has a value. Hill Climbing
+        and related algorithms try to maximize this value."""
+        locs = getattr(self.graph, 'locations', None)
+        straigh_line_distance_initial_to_goal = int(distance(locs[self.initial], locs[self.goal]))
+
+        straigh_line_distance_current_to_goal = self.h(state)
+
+        return (straigh_line_distance_initial_to_goal - straigh_line_distance_current_to_goal)
     
 class SimpleProblemSolvingAgent(SimpleProblemSolvingAgentProgram):
     """
@@ -49,7 +115,7 @@ class SimpleProblemSolvingAgent(SimpleProblemSolvingAgentProgram):
         return self.goal
 
     def formulate_problem(self, state, goal):
-        TSP = GraphProblem(state, goal, self.graph)
+        TSP = TravelingSalesmanProblem(state, goal, self.graph)
         return TSP
 
     def search(self, problem):
@@ -63,5 +129,9 @@ class SimpleProblemSolvingAgent(SimpleProblemSolvingAgentProgram):
         """
         if self.search_algorithm == 'Greedy':
             return best_first_graph_search(problem, problem.h, False)
+        elif self.search_algorithm == 'Astar':
+            return astar_search(problem, problem.h, False)
+        elif self.search_algorithm == 'Hill_climbing':
+            return my_hill_climbing(problem)
         
         return None
