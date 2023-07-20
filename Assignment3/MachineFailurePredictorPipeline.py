@@ -11,7 +11,10 @@ import pandas as pd
 import os
 import sys
 from imblearn.under_sampling import RandomUnderSampler
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.linear_model import LogisticRegression
+
+from sklearn.metrics import accuracy_score, confusion_matrix, matthews_corrcoef
 
 PRINT_DEBUG_OUTPUT = 0
 PRINT_VERBOSE_OUTPUT = 0
@@ -83,3 +86,17 @@ y = pmd_bal_df['Machine failure']
 
 # Generate training and test datasets, 30% will belong to test dataset
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
+
+clf = LogisticRegression(max_iter=500).fit(X_train, y_train)
+# score = clf.score(X_test, y_test)
+# print(score)
+
+predictions = clf.predict(X_test)
+bin_predictions = [1 if x >= 0.5 else 0 for x in predictions]
+
+print(accuracy_score(y_test, bin_predictions))
+print(confusion_matrix(y_test, bin_predictions))
+print(matthews_corrcoef(y_test, bin_predictions))
+
+# scores = cross_val_score(clf, X_train, y_train, cv=5)
+# print(scores)
