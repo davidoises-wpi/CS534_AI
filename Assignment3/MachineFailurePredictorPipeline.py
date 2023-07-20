@@ -11,9 +11,10 @@ import pandas as pd
 import os
 import sys
 from imblearn.under_sampling import RandomUnderSampler
+from sklearn.model_selection import train_test_split
 
 PRINT_DEBUG_OUTPUT = 0
-PRINT_VERBOSE_OUTPUT = 1
+PRINT_VERBOSE_OUTPUT = 0
 PRINT_WIP_OUTPUT = 1
 
 """ Loading dataset """
@@ -53,7 +54,11 @@ if PRINT_VERBOSE_OUTPUT:
     print("Rows: " + str(nonfaulted_machines_data.shape[0]) + ", Columns: " + str(nonfaulted_machines_data.shape[1]))
 
 
+# Sampling strategy = 1.0 means the same amount of fulted and non-faulted samples will be present
+# in the resampled dataset
 rus = RandomUnderSampler(sampling_strategy=1.0)
+
+# Resample using the machine failure column as the classifier
 pmd_bal_df, y_res = rus.fit_resample(pmd_df, pmd_df['Machine failure'])
 
 if PRINT_VERBOSE_OUTPUT:
@@ -72,3 +77,9 @@ if PRINT_DEBUG_OUTPUT:
     print(pmd_bal_df.to_string())
 
 """ Training the model"""
+
+X = pmd_bal_df.drop(columns=['Machine failure'])
+y = pmd_bal_df['Machine failure']
+
+# Generate training and test datasets, 30% will belong to test dataset
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
