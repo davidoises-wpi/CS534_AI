@@ -1,3 +1,5 @@
+import os
+import sys
 import pandas as pd
 import statsmodels.api as sm
 from sklearn.model_selection import train_test_split
@@ -6,7 +8,9 @@ from sklearn.metrics import roc_curve, roc_auc_score
 import matplotlib.pyplot as plt
 
 def main():
-    t_df = pd.read_csv('titanic_data.csv', index_col='PassengerId')
+    input_dataset_file = os.path.join(sys.path[0], "titanic_data.csv")
+
+    t_df = pd.read_csv(input_dataset_file, index_col='PassengerId')
     t_df = t_df.dropna()
     t_df.drop(columns=['Name', 'Cabin', 'Ticket'], inplace=True)
     t_df['Sex'].replace(['male', 'female'], [1, 0], inplace=True)
