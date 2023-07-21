@@ -218,38 +218,65 @@ def main():
 
     """Logistic Regresion"""
     logistic_regression_estimator, logistic_regression_mcc_score = train_logistic_regression(X_train, y_train)
+    logistic_regression_mcc_score_avg = sum(logistic_regression_mcc_score)/len(logistic_regression_mcc_score)
 
     """Decission Tree"""
     decision_tree_estimator, decision_tree_mcc_score, decision_tree_best_params = train_decision_tree(X_train, y_train)
+    decision_tree_mcc_score_avg = sum(decision_tree_mcc_score)/len(decision_tree_mcc_score)
 
     """K-Nearest Neighbors"""
     kneighbors_estimator, kneighbors_mcc_score, kneighbors_best_params = train_kneighnors(X_train, y_train)
+    kneighbors_mcc_score_avg = sum(kneighbors_mcc_score)/len(kneighbors_mcc_score)
 
     """K-Nearest Neighbors"""
     svm_estimator, svm_mcc_score, svm_best_params = train_svm(X_train, y_train)
+    svm_mcc_score_avg = sum(svm_mcc_score)/len(svm_mcc_score)
 
     """Artificial Neural Network"""
     ann_estimator, ann_mcc_score, ann_best_params = train_ann(X_train, y_train)
+    ann_mcc_score_avg = sum(ann_mcc_score)/len(ann_mcc_score)
+        
+    # Generat a dataframe with the training results. Pandas dataframe makes it easier to print in a table form
+    data = {
+        'Best Set Of Parameters': ["NA", decision_tree_best_params, kneighbors_best_params, svm_best_params, ann_best_params],
+        'MCC score on training set': [logistic_regression_mcc_score_avg, decision_tree_mcc_score_avg, kneighbors_mcc_score_avg, svm_mcc_score_avg, ann_mcc_score_avg]
+    }
+    algorithm_names = ["Logistic Regression", "Decision Tree", "K Nearest Neighbors", "SVM", "ANN"]
+    training_results = pd.DataFrame(data, index=algorithm_names)
 
-    if PRINT_DEBUG_OUTPUT:
-        print("Logistic Regression MCC score on 5 cross validation")
-        print(logistic_regression_mcc_score)
-        print("Decision Tree MCC score on 5 cross validation")
-        print(decision_tree_mcc_score)
-        print("Decision Tree best parameters after tuning")
-        print(decision_tree_best_params)
-        print("K Nearest Neighbors MCC score on 5 cross validation")
-        print(kneighbors_mcc_score)
-        print("K Nearest Neighbors best parameters after tuning")
-        print(kneighbors_best_params)
-        print("SVM MCC score on 5 cross validation")
-        print(svm_mcc_score)
-        print("SVM best parameters after tuning")
-        print(svm_best_params)
-        print("ANN MCC score on 5 cross validation")
-        print(ann_mcc_score)
-        print("ANN best parameters after tuning")
-        print(ann_best_params)
+    # if PRINT_DEBUG_OUTPUT:
+    print()
+    print(training_results.to_string())
+    print()
+
+    # Now used the trained classifiers with the tests datasets
+    logistic_regression_mcc_score = cross_val_score(logistic_regression_estimator, X_test, y_test, cv=5, scoring=evaluate_estimator_with_matthews_corrcoef)
+    logistic_regression_mcc_score_avg = sum(logistic_regression_mcc_score)/len(logistic_regression_mcc_score)
+
+    decision_tree_mcc_score = cross_val_score(decision_tree_estimator, X_test, y_test, cv=5, scoring=evaluate_estimator_with_matthews_corrcoef)
+    decision_tree_mcc_score_avg = sum(decision_tree_mcc_score)/len(decision_tree_mcc_score)
+
+    kneighbors_mcc_score = cross_val_score(kneighbors_estimator, X_test, y_test, cv=5, scoring=evaluate_estimator_with_matthews_corrcoef)
+    kneighbors_mcc_score_avg = sum(kneighbors_mcc_score)/len(kneighbors_mcc_score)
+
+    svm_mcc_score = cross_val_score(svm_estimator, X_test, y_test, cv=5, scoring=evaluate_estimator_with_matthews_corrcoef)
+    svm_mcc_score_avg = sum(svm_mcc_score)/len(svm_mcc_score)
+
+    ann_mcc_score = cross_val_score(ann_estimator, X_test, y_test, cv=5, scoring=evaluate_estimator_with_matthews_corrcoef)
+    ann_mcc_score_avg = sum(ann_mcc_score)/len(ann_mcc_score)
+
+    # Generat a dataframe with the training results. Pandas dataframe makes it easier to print in a table form
+    data = {
+        'Best Set Of Parameters': ["NA", decision_tree_best_params, kneighbors_best_params, svm_best_params, ann_best_params],
+        'MCC score on test set': [logistic_regression_mcc_score_avg, decision_tree_mcc_score_avg, kneighbors_mcc_score_avg, svm_mcc_score_avg, ann_mcc_score_avg]
+    }
+    algorithm_names = ["Logistic Regression", "Decision Tree", "K Nearest Neighbors", "SVM", "ANN"]
+    test_results = pd.DataFrame(data, index=algorithm_names)
+
+    # if PRINT_DEBUG_OUTPUT:
+    print()
+    print(test_results.to_string())
+    print()
 
 
 if __name__ == "__main__":
