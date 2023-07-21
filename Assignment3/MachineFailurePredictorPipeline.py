@@ -2,9 +2,10 @@
 ML Models to be used and the tuning parameters:
 1. Logistic Regression (Week 5)
 2. Decision Tree: criterion, cpp_alpha (Week 6)
-1. Artificial Nerual Neworks: hidden_layer_sizes, activation
-2. Support Vector Machine: C, Kernel
-3. K-Nearest Neighbors: n_neighbors, p
+3. K-Nearest Neighbors: n_neighbors, p (Week 6)
+4. Support Vector Machine: C, Kernel
+5. Artificial Nerual Neworks: hidden_layer_sizes, activation
+
 """
 
 import pandas as pd
@@ -15,6 +16,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
 
 from sklearn.metrics import accuracy_score, confusion_matrix, matthews_corrcoef
 
@@ -118,6 +120,26 @@ def train_decision_tree(X,y):
 
     return clf, score, grid.best_params_
 
+def train_kneighnors(X,y):
+
+    # Parameters to be tuned in K nearest neighbor model
+    param_dict = {
+        "n_neighbors":range(3,21,2),
+        "p":[1,2]
+    }
+
+    # Grid search to try all posibilities based on 5 cross fold validation results
+    grid = GridSearchCV(KNeighborsClassifier(),
+                 param_grid=param_dict,
+                 cv=5,
+                 scoring=evaluate_estimator_with_matthews_corrcoef)
+    grid.fit(X, y)
+
+    clf = grid.best_estimator_
+    score = cross_val_score(clf, X, y, cv=5, scoring=evaluate_estimator_with_matthews_corrcoef)
+
+    return clf, score, grid.best_params_
+
 def main():
 
     # Full filename to avoid issues opening file
@@ -158,13 +180,22 @@ def main():
     """Decission Tree"""
     decision_tree_estimator, decision_tree_mcc_score, decision_tree_best_params = train_decision_tree(X_train, y_train)
 
-    if PRINT_WIP_OUTPUT:
+    """K-Nearest Neighbors"""
+    kneighbors_estimator, kneighbors_mcc_score, kneighbors_best_params = train_kneighnors(X_train, y_train)
+
+    if PRINT_DEBUG_OUTPUT:
         print("Logistic Regression MCC score on 5 cross validation")
         print(logistic_regression_mcc_score)
         print("Decision Tree MCC score on 5 cross validation")
         print(decision_tree_mcc_score)
         print("Decision Tree best parameters after tuning")
         print(decision_tree_best_params)
+        print("K Nearest Neighbors MCC score on 5 cross validation")
+        print(kneighbors_mcc_score)
+        print("K Nearest Neighbors best parameters after tuning")
+        print(kneighbors_best_params)
+    
+    # if PRINT_WIP_OUTPUT:
 
 
 if __name__ == "__main__":
