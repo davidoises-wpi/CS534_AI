@@ -17,8 +17,8 @@ from sklearn.model_selection import train_test_split, cross_val_score, GridSearc
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
-
-from sklearn.metrics import accuracy_score, confusion_matrix, matthews_corrcoef
+from sklearn.svm import SVC
+from sklearn.metrics import matthews_corrcoef
 
 PRINT_DEBUG_OUTPUT = 0
 PRINT_VERBOSE_OUTPUT = 0
@@ -140,6 +140,26 @@ def train_kneighnors(X,y):
 
     return clf, score, grid.best_params_
 
+def train_svm(X,y):
+
+    # Parameters to be tuned in K nearest neighbor model
+    param_dict = {
+        "kernel":["linear", "poly", "rbf", "sigmoid"],
+        "C":[0.1, 1, 10, 100, 1000]
+    }
+
+    # Grid search to try all posibilities based on 5 cross fold validation results
+    grid = GridSearchCV(SVC(),
+                 param_grid=param_dict,
+                 cv=5,
+                 scoring=evaluate_estimator_with_matthews_corrcoef)
+    grid.fit(X, y)
+
+    clf = grid.best_estimator_
+    score = cross_val_score(clf, X, y, cv=5, scoring=evaluate_estimator_with_matthews_corrcoef)
+
+    return clf, score, grid.best_params_
+
 def main():
 
     # Full filename to avoid issues opening file
@@ -183,6 +203,9 @@ def main():
     """K-Nearest Neighbors"""
     kneighbors_estimator, kneighbors_mcc_score, kneighbors_best_params = train_kneighnors(X_train, y_train)
 
+    """K-Nearest Neighbors"""
+    svm_estimator, svm_mcc_score, svm_best_params = train_svm(X_train, y_train)
+
     if PRINT_DEBUG_OUTPUT:
         print("Logistic Regression MCC score on 5 cross validation")
         print(logistic_regression_mcc_score)
@@ -194,6 +217,10 @@ def main():
         print(kneighbors_mcc_score)
         print("K Nearest Neighbors best parameters after tuning")
         print(kneighbors_best_params)
+        print("SVM MCC score on 5 cross validation")
+        print(svm_mcc_score)
+        print("SVM best parameters after tuning")
+        print(svm_best_params)
     
     # if PRINT_WIP_OUTPUT:
 
