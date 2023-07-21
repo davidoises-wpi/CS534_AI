@@ -278,6 +278,10 @@ def main():
     print(test_results.to_string())
     print()
 
+    best_algorithm_index = pd.Series([logistic_regression_mcc_score_avg, decision_tree_mcc_score_avg, kneighbors_mcc_score_avg, svm_mcc_score_avg, ann_mcc_score_avg]).idxmax()
+    print()
+    print(algorithm_names[best_algorithm_index])
+
 
 if __name__ == "__main__":
     main()
