@@ -1,12 +1,3 @@
-"""
-ML Models to be used and the tuning parameters:
-1. Logistic Regression (Week 5)
-2. Decision Tree: criterion, cpp_alpha (Week 6)
-3. K-Nearest Neighbors: n_neighbors, p (Week 6)
-4. Support Vector Machine: C, Kernel
-5. Artificial Nerual Neworks: hidden_layer_sizes, activation
-
-"""
 
 import pandas as pd
 import os
@@ -18,6 +9,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
+from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import matthews_corrcoef
 
 PRINT_DEBUG_OUTPUT = 0
@@ -160,7 +152,37 @@ def train_svm(X,y):
 
     return clf, score, grid.best_params_
 
+def train_ann(X,y):
+    # Parameters to be tuned in ANN model
+    param_dict = {
+        "activation":["identity", "logistic", "tanh", "relu"],
+        "hidden_layer_sizes":[(4, 2), (3, 3), (8, 4), (12, 6, 3), (12, 8, 3)],
+        "learning_rate_init":[0.01, 0.1, 0.2],
+        "solver":["sgd"],
+        "max_iter":[1000],
+    }
+
+    # Grid search to try all posibilities based on 5 cross fold validation results
+    grid = GridSearchCV(MLPClassifier(),
+                 param_grid=param_dict,
+                 cv=5,
+                 scoring=evaluate_estimator_with_matthews_corrcoef)
+    grid.fit(X, y)
+
+    clf = grid.best_estimator_
+    score = cross_val_score(clf, X, y, cv=5, scoring=evaluate_estimator_with_matthews_corrcoef)
+
+    return clf, score, grid.best_params_
+
 def main():
+    """
+    ML Models to be used and their respective tuning hyperparameters:
+    1. Logistic Regression: NA (Week 5)
+    2. Decision Tree: criterion, cpp_alpha (Week 6)
+    3. K-Nearest Neighbors: n_neighbors, p (Week 6)
+    4. Support Vector Machine: C, Kernel (Week 6)
+    5. Artificial Nerual Neworks: hidden_layer_sizes, activation
+    """
 
     # Full filename to avoid issues opening file
     input_dataset_file = os.path.join(sys.path[0], "ai4i2020.csv")
@@ -206,6 +228,9 @@ def main():
     """K-Nearest Neighbors"""
     svm_estimator, svm_mcc_score, svm_best_params = train_svm(X_train, y_train)
 
+    """Artificial Neural Network"""
+    ann_estimator, ann_mcc_score, ann_best_params = train_ann(X_train, y_train)
+
     if PRINT_DEBUG_OUTPUT:
         print("Logistic Regression MCC score on 5 cross validation")
         print(logistic_regression_mcc_score)
@@ -221,8 +246,10 @@ def main():
         print(svm_mcc_score)
         print("SVM best parameters after tuning")
         print(svm_best_params)
-    
-    # if PRINT_WIP_OUTPUT:
+        print("ANN MCC score on 5 cross validation")
+        print(ann_mcc_score)
+        print("ANN best parameters after tuning")
+        print(ann_best_params)
 
 
 if __name__ == "__main__":
