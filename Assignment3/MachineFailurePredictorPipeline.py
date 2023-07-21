@@ -13,6 +13,7 @@ import sys
 from imblearn.under_sampling import RandomUnderSampler
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import MinMaxScaler
 
 from sklearn.metrics import accuracy_score, confusion_matrix, matthews_corrcoef
 
@@ -35,9 +36,13 @@ if PRINT_DEBUG_OUTPUT:
     print("Dataset with raw values")
     print(pmd_df.to_string())
 
-""" Categorical data transformation (and normalizing?) """
+""" Categorical data transformation and normalization """
 
 pmd_df['Type'].replace(['L', 'M', 'H'], [0, 1, 2], inplace=True)
+
+normalizer = MinMaxScaler().fit(pmd_df)
+normalized_array = normalizer.transform(pmd_df)
+pmd_df = pd.DataFrame(normalized_array, columns=list(pmd_df.columns))
 
 if PRINT_DEBUG_OUTPUT:
     print("Dataset with categorical data transformation")
