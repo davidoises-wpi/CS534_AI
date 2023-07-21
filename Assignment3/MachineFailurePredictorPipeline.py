@@ -89,52 +89,13 @@ def evaluate_estimator_with_matthews_corrcoef(estimator, X, y):
 
     return score
 
-def main():
+def train_logistic_regression(X,y):
+    clf = LogisticRegression(max_iter=500).fit(X, y)
+    score = cross_val_score(clf, X, y, cv=5, scoring=evaluate_estimator_with_matthews_corrcoef)
 
-    # Full filename to avoid issues opening file
-    input_dataset_file = os.path.join(sys.path[0], "ai4i2020.csv")
+    return clf, score
 
-    # Loading Predictive Maintainance Dataset and removing undesired fields
-    raw_pmd_df = load_dataset(input_dataset_file, ['Product ID', 'TWF', 'HDF', 'PWF', 'OSF', 'RNF'])
-
-    if PRINT_DEBUG_OUTPUT:
-        print("Dataset with raw values")
-        print(raw_pmd_df.to_string())
-
-    #Categorical data transformation and normalization
-    normd_pmd_df = preprocess_dataset(raw_pmd_df)    
-
-    if PRINT_DEBUG_OUTPUT:
-        print("Dataset with categorical data transformation and normalization")
-        print(normd_pmd_df.to_string())
-
-    """ Balancing dataset, undersampling non-faulted machines data"""
-    pmd_bal_df = resample_dataset(normd_pmd_df)
-
-    if PRINT_DEBUG_OUTPUT:
-        print("Dataset after resampling")
-        print(pmd_bal_df.to_string())
-
-    """ Training the model"""
-
-    X = pmd_bal_df.drop(columns=['Machine failure'])
-    y = pmd_bal_df['Machine failure']
-
-    # Generate training and test datasets, 30% will belong to test dataset
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
-
-    """Logistic Regresion"""
-    # clf = LogisticRegression(max_iter=500).fit(X_train, y_train)
-
-    # predictions = clf.predict(X_test)
-    # bin_predictions = [1 if x >= 0.5 else 0 for x in predictions]
-
-    # print(accuracy_score(y_test, bin_predictions))
-    # print(confusion_matrix(y_test, bin_predictions))
-    # print(matthews_corrcoef(y_test, bin_predictions))
-
-    """Decission Tree"""
-
+def train_decision_tree(X,y):
     # This can be used to understand the ranges of ccp_alphas. In this case it seemed the maximum was 0.2
     # path = clf.cost_complexity_pruning_path(X_train, y_train)
     # ccp_alphas, impurities = path.ccp_alphas, path.impurities
@@ -150,22 +111,60 @@ def main():
                  param_grid=param_dict,
                  cv=5,
                  scoring=evaluate_estimator_with_matthews_corrcoef)
-    grid.fit(X_train, y_train)
+    grid.fit(X, y)
 
-    # Get the trained model with the best hyperparameters
     clf = grid.best_estimator_
-    print(grid.best_score_)
+    score = cross_val_score(clf, X, y, cv=5, scoring=evaluate_estimator_with_matthews_corrcoef)
 
-    # predictions = clf.predict(X_test)
-    # bin_predictions = [1 if x >= 0.5 else 0 for x in predictions]
+    return clf, score, grid.best_params_
 
+def main():
 
-    res = cross_val_score(clf, X_train, y_train, cv=5, scoring=evaluate_estimator_with_matthews_corrcoef)
-    print(res)
+    # Full filename to avoid issues opening file
+    input_dataset_file = os.path.join(sys.path[0], "ai4i2020.csv")
 
-    # print(accuracy_score(y_test, bin_predictions))
-    # print(confusion_matrix(y_test, bin_predictions))
-    # print(matthews_corrcoef(y_test, bin_predictions))
+    # Loading Predictive Maintainance Dataset and removing undesired fields
+    raw_pmd_df = load_dataset(input_dataset_file, ['Product ID', 'TWF', 'HDF', 'PWF', 'OSF', 'RNF'])
+
+    if PRINT_VERBOSE_OUTPUT:
+        print("Dataset with raw values")
+        print(raw_pmd_df.to_string())
+
+    #Categorical data transformation and normalization
+    normd_pmd_df = preprocess_dataset(raw_pmd_df)    
+
+    if PRINT_VERBOSE_OUTPUT:
+        print("Dataset with categorical data transformation and normalization")
+        print(normd_pmd_df.to_string())
+
+    """ Balancing dataset, undersampling non-faulted machines data"""
+    pmd_bal_df = resample_dataset(normd_pmd_df)
+
+    if PRINT_VERBOSE_OUTPUT:
+        print("Dataset after resampling")
+        print(pmd_bal_df.to_string())
+
+    """ Training the models"""
+
+    X = pmd_bal_df.drop(columns=['Machine failure'])
+    y = pmd_bal_df['Machine failure']
+
+    # Generate training and test datasets, 30% will belong to test dataset
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
+
+    """Logistic Regresion"""
+    logistic_regression_estimator, logistic_regression_mcc_score = train_logistic_regression(X_train, y_train)
+
+    """Decission Tree"""
+    decision_tree_estimator, decision_tree_mcc_score, decision_tree_best_params = train_decision_tree(X_train, y_train)
+
+    if PRINT_WIP_OUTPUT:
+        print("Logistic Regression MCC score on 5 cross validation")
+        print(logistic_regression_mcc_score)
+        print("Decision Tree MCC score on 5 cross validation")
+        print(decision_tree_mcc_score)
+        print("Decision Tree best parameters after tuning")
+        print(decision_tree_best_params)
 
 
 if __name__ == "__main__":
