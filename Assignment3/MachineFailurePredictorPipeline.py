@@ -244,10 +244,10 @@ def main():
     algorithm_names = ["Logistic Regression", "Decision Tree", "K Nearest Neighbors", "SVM", "ANN"]
     training_results = pd.DataFrame(data, index=algorithm_names)
 
-    # if PRINT_DEBUG_OUTPUT:
-    print()
-    print(training_results.to_string())
-    print()
+    if PRINT_DEBUG_OUTPUT:
+        print()
+        print(training_results.to_string())
+        print()
 
     # Now used the trained classifiers with the tests datasets
     logistic_regression_mcc_score = cross_val_score(logistic_regression_estimator, X_test, y_test, cv=5, scoring=evaluate_estimator_with_matthews_corrcoef)
@@ -273,14 +273,15 @@ def main():
     algorithm_names = ["Logistic Regression", "Decision Tree", "K Nearest Neighbors", "SVM", "ANN"]
     test_results = pd.DataFrame(data, index=algorithm_names)
 
-    # if PRINT_DEBUG_OUTPUT:
-    print()
-    print(test_results.to_string())
-    print()
+    if PRINT_DEBUG_OUTPUT:
+        print()
+        print(test_results.to_string())
+        print()
 
+    # Find the best algorithm best on the max score gotten on the test set
     best_algorithm_index = pd.Series([logistic_regression_mcc_score_avg, decision_tree_mcc_score_avg, kneighbors_mcc_score_avg, svm_mcc_score_avg, ann_mcc_score_avg]).idxmax()
     print()
-    print(algorithm_names[best_algorithm_index])
+    print("The best algorithm to be used for this problem is the " + algorithm_names[best_algorithm_index])
 
 
 if __name__ == "__main__":
