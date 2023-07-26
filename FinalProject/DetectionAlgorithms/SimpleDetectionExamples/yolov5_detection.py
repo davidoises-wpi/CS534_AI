@@ -5,7 +5,7 @@ import torch
 import cv2
 
 FILE = Path(__file__).resolve()
-ROOT = FILE.parents[0]  # YOLOv5 root directory
+ROOT = FILE.parents[2]  # YOLOv5 root directory
 YOLO_ROOT = ROOT / 'yolov5'
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
@@ -51,7 +51,7 @@ for path, im, im0s, vid_cap, s in dataset:
         print(im0s)
         print(vid_cap)
         print(s)
-    
+
     with dt[0]:
         im = torch.from_numpy(im).to(model.device)
         im = im.float()

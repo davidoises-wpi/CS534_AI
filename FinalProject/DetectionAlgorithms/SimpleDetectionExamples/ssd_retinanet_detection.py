@@ -5,20 +5,22 @@ import cv2
 import cvzone
 import os
 import sys
+from pathlib import Path
 
+project_root = Path(sys.path[0]).parents[1]
 
 # model = torchvision.models.detection.ssd300_vgg16(pretrained = True)
 model = torchvision.models.detection.retinanet_resnet50_fpn(pretrained = True)
 model.eval()
 
-classes_file = os.path.join(sys.path[0], "classes.txt")
+classes_file = os.path.join(project_root, "classes.txt")
 classnames = []
 with open(classes_file,'r') as f:
     classnames = f.read().splitlines()
 
 # print(classnames[0])
 
-image_filename = os.path.join(sys.path[0], "pedestrians.jpg")
+image_filename = os.path.join(project_root, "images/pedestrians.jpg")
 image = cv2.imread(image_filename)
 img = image.copy()
 print(type(image))
