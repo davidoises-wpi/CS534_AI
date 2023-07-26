@@ -3,6 +3,7 @@ import os
 import glob
 import DatasetDetect_ssd
 import DatasetDetect_retinanet
+import DatasetDetect_yolov5
 from pathlib import Path
 import sys
 import time
@@ -14,7 +15,7 @@ if str(ECPB_ROOT) not in sys.path:
 
 import dataconverter
 
-image_count_limit = 30
+image_count_limit = 1000
 
 def run_detector_on_dataset(root_folder, time_of_day='day', mode='val', algorithm='ssd'):
     assert mode in ['val', 'test']
@@ -30,10 +31,12 @@ def run_detector_on_dataset(root_folder, time_of_day='day', mode='val', algorith
     for im in eval_imgs:
 
         st = time.time()
-        if algorithm == 'ssd':
-            detections = DatasetDetect_ssd.detect(im)
+        if algorithm == 'yolov5':
+            detections = DatasetDetect_yolov5.detect(im)
         elif algorithm == 'retinanet':
             detections = DatasetDetect_retinanet.detect(im)
+        else:
+            detections = DatasetDetect_ssd.detect(im)
         et = time.time()
 
         execution_times.append((et-st)*1000.0)
@@ -64,3 +67,5 @@ if __name__ == "__main__":
     run_detector_on_dataset(project_root, time_of_day='day', mode='val', algorithm='ssd')
 
     run_detector_on_dataset(project_root, time_of_day='day', mode='val', algorithm='retinanet')
+
+    run_detector_on_dataset(project_root, time_of_day='day', mode='val', algorithm='yolov5')

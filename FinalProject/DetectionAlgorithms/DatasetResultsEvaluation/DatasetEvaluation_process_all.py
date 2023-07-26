@@ -123,3 +123,5 @@ if __name__ == "__main__":
     eval(project_root, time='day', mode='working_subset', eval_type='pedestrian', det_method_name='ssd')
 
     eval(project_root, time='day', mode='working_subset', eval_type='pedestrian', det_method_name='retinanet')
+
+    eval(project_root, time='day', mode='working_subset', eval_type='pedestrian', det_method_name='yolov5')
