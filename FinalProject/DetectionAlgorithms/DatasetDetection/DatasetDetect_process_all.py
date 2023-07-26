@@ -14,6 +14,7 @@ if str(ECPB_ROOT) not in sys.path:
 
 import dataconverter
 
+image_count_limit = 30
 
 def run_detector_on_dataset(root_folder, time_of_day='day', mode='val', algorithm='ssd'):
     assert mode in ['val', 'test']
@@ -25,7 +26,6 @@ def run_detector_on_dataset(root_folder, time_of_day='day', mode='val', algorith
     dataconverter.create_base_dir(destdir)
 
     execution_times = []
-    image_count_limit = 10
     image_counter = 0
     for im in eval_imgs:
 
